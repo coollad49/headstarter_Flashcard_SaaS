@@ -4,7 +4,8 @@ import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { doc, writeBatch, collection, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { db } from "@/firebase"; // Make sure to import your Firestore instance
+import { Container, Box, Typography, Paper, TextField, Button } from "@mui/material"; // Imported missing components
+import { db } from "@/firebase"; // Ensure you have your Firestore instance correctly configured
 
 export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -69,37 +70,45 @@ export default function Generate() {
     });
 
     await batch.commit();
-    handleClose
-    router.push("/flashcards")
-  }
-  return <Container maxWidth="md">
-    <Box 
-    sx={{
-        mt: 4, 
-        mb: 6,
-        display: "flex", 
-        flexDirection: "column", 
-        alignItems: "center"
-    }}>
-    <Typography variant="h4">Generate Flashcards</Typography>
-    <Paper sx={{p:4, width:"100%"}}>
-    <Textfield value = {text} onChange={(e) => setText(e.target.value)} label="Enter text" fullWidth multiline rows={4} variant = "outlined" 
+    handleClose();
+    router.push("/flashcards");
+  };
+
+  return (
+    <Container maxWidth="md">
+      <Box
         sx={{
-            mb: 2,
+          mt: 4,
+          mb: 6,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-        />
-        <Button 
-            variant= "contained" 
-            color="primary" 
-            onClick={handleSubmit} 
+      >
+        <Typography variant="h4">Generate Flashcards</Typography>
+        <Paper sx={{ p: 4, width: "100%" }}>
+          <TextField
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            label="Enter text"
             fullWidth
-        >
-            {' '}
+            multiline
+            rows={4}
+            variant="outlined"
+            sx={{
+              mb: 2,
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            fullWidth
+          >
             Submit
-        </Button>
+          </Button>
         </Paper>
-        </Box>
-
-
-  </Container>
+      </Box>
+    </Container>
+  );
 }
