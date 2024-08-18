@@ -2,9 +2,11 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
+import { Container, Box, Typography, Paper, TextField, Button } from "@mui/material"; // Imported missing components
 import { doc, writeBatch, collection, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { db } from "@/firebase"; // Ensure you have your Firestore instance correctly configured
+
 
 export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
