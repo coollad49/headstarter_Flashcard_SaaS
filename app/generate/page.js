@@ -7,7 +7,6 @@ import { doc, writeBatch, collection, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { db } from "@/firebase"; // Ensure you have your Firestore instance correctly configured
 
-
 export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcards, setFlashcards] = useState([]);
