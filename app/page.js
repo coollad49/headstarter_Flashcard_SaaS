@@ -1,10 +1,34 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 import getPaystack from "@/utils/get-paystack";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
 import Head from "next/head";
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = (amount, email) => {
+    setLoading(true);
+    const paystack = getPaystack();
+    paystack.initialize({
+      key: process.env.PAYSTACK_PUBLIC_KEY,
+      email: email,
+      amount: amount * 100, // Paystack uses the smallest unit of currency
+      currency: "USD",
+      callback: function (response) {
+        alert(`Payment complete! Reference: ${response.reference}`);
+        setLoading(false);
+      },
+      onClose: function () {
+        alert('Transaction was not completed.');
+        setLoading(false);
+      },
+    });
+  };
+
   return (
     <Container maxWidth="100vw">
       <Head>
@@ -16,13 +40,8 @@ export default function Home() {
         <Toolbar>
           <Typography variant="h6" style={{ flexGrow: 1 }}>Flashcard SaaS</Typography>
           <SignedOut>
-            <Button color="inherit" href="/sign-in">
-              {' '}
-              Login
-              </Button>
-            <Button color="inherit" href="/sign-up">
-              Sign Up
-              </Button>
+            <Button color="inherit" href="/sign-in">Login</Button>
+            <Button color="inherit" href="/sign-up">Sign Up</Button>
           </SignedOut>
           <SignedIn>
             <UserButton />
@@ -62,7 +81,9 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Basic</Typography>
               <Typography variant="h6" gutterBottom>$5 / month</Typography>
               <Typography>Access to basic flashcard features and limited storage.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }}>Choose Basic</Button>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => handlePayment(5, user?.email)}>
+                Choose Basic
+              </Button>
             </Box>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -70,7 +91,9 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Pro</Typography>
               <Typography variant="h6" gutterBottom>$10 / month</Typography>
               <Typography>Unlimited flashcards and storage, with priority support.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }}>Choose Pro</Button>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => handlePayment(10, user?.email)}>
+                Choose Pro
+              </Button>
             </Box>
           </Grid>
         </Grid>

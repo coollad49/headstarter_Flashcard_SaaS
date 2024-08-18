@@ -1,4 +1,4 @@
-import {loadPaystackPop} from "paystack/inline-js"
+import {loadPaystackPop} from "@paystack/inline-js"
 let paystackPromise;
 const getPaystack = () => {
     if (!paystackPromise) {
@@ -7,4 +7,4 @@ const getPaystack = () => {
     return paystackPromise;
 };
 
-export default Paystack;
+export default getPaystack;
