@@ -69,5 +69,37 @@ export default function Generate() {
     });
 
     await batch.commit();
-  };
+    handleClose
+    router.push("/flashcards")
+  }
+  return <Container maxWidth="md">
+    <Box 
+    sx={{
+        mt: 4, 
+        mb: 6,
+        display: "flex", 
+        flexDirection: "column", 
+        alignItems: "center"
+    }}>
+    <Typography variant="h4">Generate Flashcards</Typography>
+    <Paper sx={{p:4, width:"100%"}}>
+    <Textfield value = {text} onChange={(e) => setText(e.target.value)} label="Enter text" fullWidth multiline rows={4} variant = "outlined" 
+        sx={{
+            mb: 2,
+        }}
+        />
+        <Button 
+            variant= "contained" 
+            color="primary" 
+            onClick={handleSubmit} 
+            fullWidth
+        >
+            {' '}
+            Submit
+        </Button>
+        </Paper>
+        </Box>
+
+        
+  </Container>
 }
