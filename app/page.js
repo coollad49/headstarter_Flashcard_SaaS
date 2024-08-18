@@ -1,17 +1,10 @@
 import Image from "next/image";
-import getPaystack from "@/utils/get-paystack";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
-import Head from "next/head";
 
 export default function Home() {
   return (
     <Container maxWidth="100vw">
-      <Head>
-        <title>Flashcard SaaS</title>
-        <meta name="description" content="Create flashcards from your text" />
-      </Head>
-
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" style={{ flexGrow: 1 }}>Flashcard SaaS</Typography>
