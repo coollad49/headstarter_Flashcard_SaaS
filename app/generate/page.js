@@ -100,6 +100,6 @@ export default function Generate() {
         </Paper>
         </Box>
 
-        
+
   </Container>
 }
