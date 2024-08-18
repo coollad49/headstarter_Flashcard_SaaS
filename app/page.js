@@ -1,32 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import getPaystack from "@/utils/get-paystack";
+
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
-
-  const handlePayment = (amount, email) => {
-    setLoading(true);
-    const paystack = getPaystack();
-    paystack.initialize({
-      key: process.env.PAYSTACK_PUBLIC_KEY,
-      email: email,
-      amount: amount * 100, // Paystack uses the smallest unit of currency
-      currency: "USD",
-      callback: function (response) {
-        alert(`Payment complete! Reference: ${response.reference}`);
-        setLoading(false);
-      },
-      onClose: function () {
-        alert('Transaction was not completed.');
-        setLoading(false);
-      },
-    });
-  };
+  
 
   return (
     <Container maxWidth="100vw">
@@ -75,7 +54,7 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Basic</Typography>
               <Typography variant="h6" gutterBottom>$5 / month</Typography>
               <Typography>Access to basic flashcard features and limited storage.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => handlePayment(5, user?.email)}>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }}>
                 Choose Basic
               </Button>
             </Box>
@@ -85,7 +64,7 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Pro</Typography>
               <Typography variant="h6" gutterBottom>$10 / month</Typography>
               <Typography>Unlimited flashcards and storage, with priority support.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => handlePayment(10, user?.email)}>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }}>
                 Choose Pro
               </Button>
             </Box>
