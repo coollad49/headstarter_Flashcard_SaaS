@@ -3,9 +3,9 @@
 
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
-
+import {useRouter} from 'next/navigation'
 export default function Home() {
-  
+  const router = useRouter()
 
   return (
     <Container maxWidth="100vw">
@@ -25,7 +25,7 @@ export default function Home() {
       <Box sx={{ textAlign: "center", my: 4 }}>
         <Typography variant="h2" gutterBottom>Welcome to Flashcard SaaS</Typography>
         <Typography variant="h5" gutterBottom>The easiest way to make flashcards from your text</Typography>
-        <Button variant="contained" color="primary" sx={{ mt: 2 }}>Get Started</Button>
+        <Button onClick={router.push('/generate')} variant="contained" color="primary" sx={{ mt: 2 }}>Get Started</Button>
       </Box>
 
       <Box sx={{ my: 6 }}>
