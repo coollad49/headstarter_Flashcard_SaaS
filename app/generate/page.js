@@ -1,114 +1,174 @@
-"use client";
+'use client'
 
-import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
-import { Container, Box, Typography, Paper, TextField, Button } from "@mui/material"; // Imported missing components
-import { doc, writeBatch, collection, getDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
-import { db } from "@/firebase"; // Ensure you have your Firestore instance correctly configured
+import { useState } from 'react'
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+} from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
+import { Card, CardContent } from '@mui/material'
+import { Grid } from '@mui/material'
+import { doc, collection, getDoc, writeBatch } from 'firebase/firestore'
+import { firestore } from '@/firebase'
+import {useUser} from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 export default function Generate() {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const [flashcards, setFlashcards] = useState([]);
-  const [flipped, setFlipped] = useState([]);
-  const [text, setText] = useState("");
-  const [name, setName] = useState("");
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const { isLoaded, isSignedIn, user } = useUser()
+  const [text, setText] = useState('')
+  const [flashcards, setFlashcards] = useState([])
+  const [setName, setSetName] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const handleOpenDialog = () => setDialogOpen(true)
+  const handleCloseDialog = () => setDialogOpen(false)
+  const router = useRouter()
+
+  function createUrlFriendlyId(text) {
+    return text
+        .toLowerCase()            // Convert to lowercase
+        .replace(/ /g, "-")       // Replace spaces with dashes
+        .replace(/[^a-z0-9-]/g, ""); // Remove any special characters
+  }
+  const saveFlashcards = async () => {
+    if (!setName.trim()) {
+      alert('Please enter a name for your flashcard set.')
+      return
+    }
+    setSetName(setName.replaceAll(' ', '_'))
+    try {
+      const userDocRef = doc(collection(firestore, 'users'), user.id)
+      const userDocSnap = await getDoc(userDocRef)
+  
+      const batch = writeBatch(firestore)
+  
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data()
+        const updatedSets = [...(userData.flashcardSets || []), { name: setName }]
+        batch.update(userDocRef, { flashcardSets: updatedSets })
+      } else {
+        batch.set(userDocRef, { flashcardSets: [{ name: setName }] })
+      }
+  
+      const setDocRef = doc(collection(userDocRef, 'flashcardSets'), setName)
+      batch.set(setDocRef, { flashcards })
+  
+      await batch.commit()
+      router.push('/flashcards')
+      alert('Flashcards saved successfully!')
+      handleCloseDialog()
+      setSetName('')
+    } catch (error) {
+      console.error('Error saving flashcards:', error)
+      alert('An error occurred while saving flashcards. Please try again.')
+    }
+  }
 
   const handleSubmit = async () => {
-    fetch("api/generate", {
-      method: "POST",
-      body: text,
-    })
-      .then((response) => response.json())
-      .then((data) => setFlashcards(data));
-  };
-
-  const handleCardClick = (id) => {
-    setFlipped((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const saveFlashcards = async () => {
-    if (!name) {
-      alert("Please enter a name");
-      return;
+    if (!text.trim()) {
+      alert('Please enter some text to generate flashcards.')
+      return
     }
-
-    const batch = writeBatch(db);
-    const userDocRef = doc(collection(db, "users"), user.id);
-    const docSnap = await getDoc(userDocRef);
-
-    if (docSnap.exists()) {
-      const collections = docSnap.data().flashcards || [];
-      if (collections.find((f) => f.name === name)) {
-        alert("Flashcard collection with the same name already exists");
-        return;
-      } else {
-        collections.push({ name });
-        batch.set(userDocRef, { flashcards: collections }, { merge: true });
+    
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        body: text,
+      })
+  
+      if (!response.ok) {
+        throw new Error('Failed to generate flashcards')
       }
-    } else {
-      batch.set(userDocRef, { flashcards: [{ name }] });
+  
+      const data = await response.json()
+      setFlashcards(data)
+    } catch (error) {
+      console.error('Error generating flashcards:', error)
+      alert('An error occurred while generating flashcards. Please try again.')
     }
-
-    const colRef = collection(userDocRef, name);
-    flashcards.forEach((flashcard) => {
-      const cardDocRef = doc(colRef);
-      batch.set(cardDocRef, flashcard);
-    });
-
-    await batch.commit();
-    handleClose();
-    router.push("/flashcards");
-  };
+  }
 
   return (
     <Container maxWidth="md">
-      <Box
-        sx={{
-          mt: 4,
-          mb: 6,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h4">Generate Flashcards</Typography>
-        <Paper sx={{ p: 4, width: "100%" }}>
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Save Flashcard Set</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please enter a name for your flashcard set.
+          </DialogContentText>
           <TextField
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            label="Enter text"
+            autoFocus
+            margin="dense"
+            label="Set Name"
+            type="text"
             fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            sx={{
-              mb: 2,
-            }}
+            value={createUrlFriendlyId(setName)}
+            onChange={(e) => setSetName(e.target.value)}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            fullWidth
-          >
-            Submit
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={saveFlashcards} color="primary">
+            Save
           </Button>
-        </Paper>
+        </DialogActions>
+      </Dialog>
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Generate Flashcards
+        </Typography>
+        <TextField
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          label="Enter text"
+          fullWidth
+          multiline
+          rows={4}
+          variant="outlined"
+          sx={{ mb: 2 }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          fullWidth
+        >
+          Generate Flashcards
+        </Button>
       </Box>
+      
+      {/* We'll add flashcard display here */}
+      {flashcards.length > 0 && (
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Generated Flashcards
+          </Typography>
+          <Grid container spacing={2}>
+            {flashcards.map((flashcard, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">Front:</Typography>
+                    <Typography>{flashcard.front}</Typography>
+                    <Typography variant="h6" sx={{ mt: 2 }}>Back:</Typography>
+                    <Typography>{flashcard.back}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+
+      {flashcards.length > 0 && (
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+            Save Flashcards
+          </Button>
+        </Box>
+      )}
     </Container>
-  );
+  )
 }

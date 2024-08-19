@@ -1,4 +1,5 @@
-import { Container, AppBar, Toolbar, Typography, Button } from "@mui/material";
+import { SignUp } from "@clerk/nextjs";
+import { Container, AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import Link from "next/link";
 
 export default function SignUpPage() {
@@ -22,12 +23,12 @@ export default function SignUpPage() {
         </Toolbar>
       </AppBar>
 
-      <Box>
+      <Box
         display = "flex"
         flexDirection = "column"
         alignItems="center"
         justifyContent="center"
-
+      >
         <Typography variant = "h4">
             Sign Up
         </Typography>
