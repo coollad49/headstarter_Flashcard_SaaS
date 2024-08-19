@@ -1,49 +1,53 @@
-import { NextResponse } from "next/server"
+import {NextResponse} from "next/server"
 import OpenAI from "openai"
 
+const OPENROUTER_API_KEY = process.env.OPENAI_API_KEY;
+const TITLE = process.env.TITLE;
+const SITE_URL = process.env.SITE_URL;
 const systemPrompt = `
-You are a flashcard creator. Your task is to generate concise and effective flashcards based on the given topic or content. Follow these guidelines:
-
-1. Create clear and concise questions for the front of the flashcard.
-2. Provide accurate and informative answers for the back of the flashcard.
-3. Ensure that each flashcard focuses on a single concept or piece of information.
-4. Use simple language to make the flashcards accessible to a wide range of learners.
-5. Include a variety of qustion types, such as definitions, examples, comparisons, and applications.
-6. Avoid overly complex or ambiguous phrasing in both questions and answers.
-7. When appropriate, use mnemonics or memory aids to help reinforce the information.
-8. Tailor the difficulty level of the flashcards in the user's specified preferences.
-9. If given a body of text, extract the most important and relevant information for the flashcards.
-10. Aim to create a balanced set of flashcards that covers the topic comprehensively.
-
-Remember the goal is to facilitate effective learning and retention of information through these flashcards.
-
-Return in the following JSON format
+You are a flashcard creator. Your task is to generate flashcards based on the provided text. Each flashcard should have a question on one side and the answer on the other side. Ensure the questions are clear and concise, and the answers are concise, short, accurate and informative.
+Return only the JSON structure in the following format, without any additional text:
 {
     "flashcards": [
         {
-        "front": str.
-        "back": str
+            "id": int,
+            "front": str,
+            "back": str,
         }
     ]
 }
 `
 
-export async function POST(req) {
-    const openai = OpenAI()
+const POST = async(req) =>{
+    const openai = new OpenAI({ // Create a new instance of the OpenAI client
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: OPENROUTER_API_KEY,
+        defaultHeaders: {
+            "HTTP-Referer": SITE_URL, // Optional, for including your app on openrouter.ai rankings.
+            "X-Title": TITLE, // Optional. Shows in rankings on openrouter.ai.
+        }
+    })
     const data = await req.text()
 
-    const completion = await openai.chat.completion.create({
-        messages: [
-            {role: "system", content: systemPrompt},
-            {role: "user", content: data},
-        ],
-        model: "gpt-4o",
-        response_format:{type: 'json_object'}
-    })
+    const completion = await openai.chat.completions.create(
+        {
+            model: "meta-llama/llama-3.1-8b-instruct:free",
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt
+                },
+                {
+                    role: "user",
+                    content: data
+                }
+            ],
+            response_format: {type: 'json_object'},
+        }
+    )
 
     const flashcards = JSON.parse(completion.choices[0].message.content)
-
-    return NextResponse.json(flashcards.flashcard)
-
-
+    return NextResponse.json(flashcards.flashcards)
 }
+
+export {POST}
