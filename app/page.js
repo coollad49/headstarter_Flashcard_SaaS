@@ -1,5 +1,4 @@
 "use client";
-
 import {useState} from "react"
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
@@ -72,7 +71,7 @@ export default function Home() {
               <Typography variant="h6" gutterBottom>$5 / month</Typography>
               <Typography>Access to basic flashcard features and limited storage.</Typography>
               <Button variant="contained" color="primary" sx={{ mt: 2 }} 
-                onClick={() => handlePayment(5, 'user@example.com')}
+                onClick={() => handlePayment(5, 'userer@example.com')}
                 disabled={loading}
               >
                 Choose Basic
