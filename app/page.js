@@ -4,9 +4,26 @@
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Grid } from "@mui/material";
 import {useRouter} from 'next/navigation'
+import { initiatePayment } from "@/utils/paystack";
+
 export default function Home() {
   const router = useRouter()
-
+  const [loading, setLoading] = useState(false);
+  const handlePayment = (amount, email) => {
+    setLoading(true);
+    initiatePayment(
+      email,
+      amount * 160000,
+      (transaction) => {
+        alert(`Payment complete! Reference: ${transaction.reference}`);
+        setLoading(false);
+      },
+      () => {
+        alert('Transaction was not completed.');
+        setLoading(false);
+      }
+    );
+  };
   return (
     <Container maxWidth="100vw">
       <AppBar position="static">
@@ -54,7 +71,10 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Basic</Typography>
               <Typography variant="h6" gutterBottom>$5 / month</Typography>
               <Typography>Access to basic flashcard features and limited storage.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }} 
+                onClick={() => handlePayment(5, 'user@example.com')}
+                disabled={loading}
+              >
                 Choose Basic
               </Button>
             </Box>
@@ -64,7 +84,10 @@ export default function Home() {
               <Typography variant="h5" gutterBottom>Pro</Typography>
               <Typography variant="h6" gutterBottom>$10 / month</Typography>
               <Typography>Unlimited flashcards and storage, with priority support.</Typography>
-              <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+              <Button variant="contained" color="primary" sx={{ mt: 2 }}
+                onClick={() => handlePayment(10, 'user@example.com')}
+                disabled={loading}
+              >
                 Choose Pro
               </Button>
             </Box>
